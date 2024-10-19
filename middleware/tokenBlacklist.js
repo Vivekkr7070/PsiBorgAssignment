@@ -1,7 +1,15 @@
 const redis = require('redis');
+// const createClient =require( 'redis');
+
 
 // Create the Redis client instance
-const client = redis.createClient();
+const client = redis.createClient({
+  password: 'IJovCLDeXXYs2hDi8MBzOF3ymsTXdWDN',
+  socket: {
+      host: 'redis-10222.c305.ap-south-1-1.ec2.redns.redis-cloud.com',
+      port: 10222
+  }
+});
 
 client.on('error', (err) => {
   console.error('Redis connection error:', err);
