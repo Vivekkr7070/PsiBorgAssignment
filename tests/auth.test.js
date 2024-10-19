@@ -1,44 +1,55 @@
-const request = require('supertest');
-const app = require('../server');
-const mongoose = require('mongoose');
-const User = require('../models/User');
+// tests/auth.test.js
 
-beforeAll(async () => {
-  await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-});
+const chai = require('chai');
+const chaiHttp = require('chai-http');
+const server = require('../server');
+const expect = chai.expect;
 
-afterAll(async () => {
-  await mongoose.connection.close();
-});
+chai.use(chaiHttp);
 
-describe('Authentication', () => {
-  let token;
-  
-  it('should register a user', async () => {
-    const res = await request(app).post('/api/auth/register').send({
-      username: 'testuser',
-      email: 'test@example.com',
-      password: 'Test1234!',
-    });
-    expect(res.statusCode).toBe(201);
-    expect(res.body).toHaveProperty('token');
+describe('Auth API', () => {
+  // Test case for successful login
+  it('should login a user successfully', (done) => {
+    chai.request(server)
+      .post('/auth/login')
+      .send({
+        email: 'test@example.com',
+        password: 'password123',
+      })
+      .end((err, res) => {
+        expect(res).to.have.status(200);
+        expect(res.body).to.have.property('token');
+        done();
+      });
   });
 
-  it('should log in the user', async () => {
-    const res = await request(app).post('/api/auth/login').send({
-      email: 'test@example.com',
-      password: 'Test1234!',
-    });
-    expect(res.statusCode).toBe(200);
-    token = res.body.token;
-    expect(token).not.toBeNull();
+  // Test case for validation failure (missing email or password)
+  it('should return validation error for missing fields', (done) => {
+    chai.request(server)
+      .post('/auth/login')
+      .send({
+        email: '',
+        password: '',
+      })
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        expect(res.body).to.have.property('error');
+        done();
+      });
   });
 
-  it('should get the current user profile', async () => {
-    const res = await request(app)
-      .get('/api/auth/me')
-      .set('Authorization', token);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.email).toBe('test@example.com');
+  // Test case for authentication failure (invalid credentials)
+  it('should return authentication failure for invalid credentials', (done) => {
+    chai.request(server)
+      .post('/auth/login')
+      .send({
+        email: 'invalid@example.com',
+        password: 'wrongpassword',
+      })
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        expect(res.body).to.have.property('error');
+        done();
+      });
   });
 });

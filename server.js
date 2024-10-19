@@ -24,7 +24,8 @@ app.use(cors());
 // Rate limiter
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+    max: 50, // Limit each IP to 100 requests per windowMs
+    message: 'Too many login attempts from this IP, please try again after 15 minutes'
 });
 app.use(limiter);
 
@@ -91,6 +92,10 @@ const shutdown = async () => {
         process.exit(1);
     }
 };
+
+app.get("/test",()=>{
+    res.status(200).sent("Tested OK")
+})
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);

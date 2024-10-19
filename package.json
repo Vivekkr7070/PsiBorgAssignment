@@ -2,8 +2,11 @@
   "name": "psiborgassignment",
   "version": "1.0.0",
   "main": "index.js",
+  "module": "ESNext",
+  "target": "ESNext",
+  "moduleResolution": "node",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "nyc mocha --loader ts-node/esm tests/**/*.test.js",
     "start": "nodemon server.js"
   },
   "keywords": [],
@@ -21,12 +24,21 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.7.1",
+    "nodemailer": "^6.9.15",
     "redis": "^4.7.0",
     "socket.io": "^4.8.0",
+    "socket.io-client": "^4.8.0",
+    "swagger-autogen": "^2.23.7",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "ts-node": "^10.9.2",
+    "twilio": "^5.3.4"
   },
   "devDependencies": {
-    "nodemon": "^3.1.7"
+    "chai": "^5.1.1",
+    "chai-http": "^5.1.1",
+    "mocha": "^10.7.3",
+    "nodemon": "^3.1.7",
+    "nyc": "^17.1.0"
   }
 }

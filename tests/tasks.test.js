@@ -1,65 +1,73 @@
-const request = require('supertest');
-const app = require('../server');
-const Task = require('../models/Task');
-const User = require('../models/User');
+// tests/tasks.test.js
+
+const chai = require('chai');
+const chaiHttp = require('chai-http');
+const server = require('../server');
+const expect = chai.expect;
+
+chai.use(chaiHttp);
 
 describe('Tasks API', () => {
   let token;
-  
-  beforeAll(async () => {
-    const user = new User({
-      username: 'manager',
-      email: 'manager@example.com',
-      password: 'Manager123!',
-      role: 'Manager',
-    });
-    await user.save();
 
-    const res = await request(app).post('/api/auth/login').send({
-      email: 'manager@example.com',
-      password: 'Manager123!',
-    });
-    token = res.body.token;
-  });
-
-  it('should create a new task', async () => {
-    const res = await request(app)
-      .post('/api/tasks')
-      .set('Authorization', token)
+  before((done) => {
+    // Assuming you have an auth route to get a valid token
+    chai.request(server)
+      .post('/auth/login')
       .send({
-        title: 'Test Task',
-        description: 'A task for testing',
-        priority: 'Medium',
+        email: 'test@example.com',
+        password: 'password123',
+      })
+      .end((err, res) => {
+        token = res.body.token;
+        done();
       });
-    expect(res.statusCode).toBe(201);
-    expect(res.body).toHaveProperty('title', 'Test Task');
   });
 
-  it('should get all tasks', async () => {
-    const res = await request(app)
-      .get('/api/tasks')
-      .set('Authorization', token);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.length).toBeGreaterThan(0);
-  });
-
-  it('should update a task', async () => {
-    const task = await Task.findOne({ title: 'Test Task' });
-    const res = await request(app)
-      .put(`/api/tasks/${task._id}`)
-      .set('Authorization', token)
+  // Test case for creating a task (success)
+  it('should create a new task', (done) => {
+    chai.request(server)
+      .post('/tasks')
+      .set('Authorization', `Bearer ${token}`)
       .send({
-        status: 'In Progress',
+        title: 'New Task',
+        description: 'Task description',
+      })
+      .end((err, res) => {
+        expect(res).to.have.status(201);
+        expect(res.body).to.have.property('task');
+        done();
       });
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('status', 'In Progress');
   });
 
-  it('should delete a task', async () => {
-    const task = await Task.findOne({ title: 'Test Task' });
-    const res = await request(app)
-      .delete(`/api/tasks/${task._id}`)
-      .set('Authorization', token);
-    expect(res.statusCode).toBe(200);
+  // Test case for validation error
+  it('should return validation error for missing title', (done) => {
+    chai.request(server)
+      .post('/tasks')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: '',
+        description: 'Task description',
+      })
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        expect(res.body).to.have.property('error');
+        done();
+      });
+  });
+
+  // Test case for authentication failure (missing token)
+  it('should return authentication failure for missing token', (done) => {
+    chai.request(server)
+      .post('/tasks')
+      .send({
+        title: 'New Task',
+        description: 'Task description',
+      })
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        expect(res.body).to.have.property('error');
+        done();
+      });
   });
 });
