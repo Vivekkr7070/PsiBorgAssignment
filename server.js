@@ -93,9 +93,10 @@ const shutdown = async () => {
     }
 };
 
-app.get("/test",(req,res)=>{
-    res.status(200).sent("Tested OK")
-})
+app.get("/test", (req, res) => {
+    res.status(200).send("Tested OK");
+});
+
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
