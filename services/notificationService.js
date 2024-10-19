@@ -1,25 +1,3 @@
-// const sgMail = require('@sendgrid/mail');
-// sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-// const sendEmail = async (to, subject, text) => {
-//   const msg = {
-//     to,
-//     from: 'no-reply@yourapp.com',
-//     subject,
-//     text
-//   };
-
-//   try {
-//     await sgMail.send(msg);
-//     console.log('Email sent successfully');
-//   } catch (error) {
-//     console.error('Error sending email:', error);
-//   }
-// };
-
-// module.exports = {
-//   sendEmail
-// };
 
 require('dotenv').config();
 const nodemailer = require("nodemailer");
@@ -35,8 +13,10 @@ const sendVerificationEmailService = async (email, subject, message) => {
                 pass: process.env.NODEMAILER_PASSWORD,
             },
         });
-// console.log(email)
-// return;
+        
+        // console.log(email)
+        // return;
+
         // Mail options including the dynamic message
         const mailOptions = {
             from: process.env.NODEMAILER_EMAIL,
@@ -63,7 +43,7 @@ const sendSMS = async (to, message) => {
         await client.messages.create({
             body: message,
             from: process.env.TWILIO_PHONE_NUMBER,
-            to:"+917070261370"
+            to: "+917070261370"
         });
         console.log('SMS sent successfully');
     } catch (error) {
@@ -72,5 +52,5 @@ const sendSMS = async (to, message) => {
 };
 
 module.exports = {
-    sendSMS,sendVerificationEmailService
+    sendSMS, sendVerificationEmailService
 };
