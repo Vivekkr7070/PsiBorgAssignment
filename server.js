@@ -93,7 +93,7 @@ const shutdown = async () => {
     }
 };
 
-app.get("/test",()=>{
+app.get("/test",(req,res)=>{
     res.status(200).sent("Tested OK")
 })
 
