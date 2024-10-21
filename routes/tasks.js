@@ -8,8 +8,6 @@ const User = require("../models/User")
 const { sendVerificationEmailService, sendSMS } = require('../services/notificationService');
 
 
-
-
 /**
  * @swagger
  * components:
@@ -19,48 +17,42 @@ const { sendVerificationEmailService, sendSMS } = require('../services/notificat
  *       required:
  *         - title
  *         - description
- *         - assignedTo
+ *         - dueDate
  *         - priority
+ *         - assignedTo
  *       properties:
  *         id:
  *           type: string
- *           description: The auto-generated ID of the task
+ *           description: The auto-generated id of the task
  *         title:
  *           type: string
- *           description: Task title
+ *           description: The task title
  *         description:
  *           type: string
- *           description: Task description
+ *           description: The task description
  *         dueDate:
  *           type: string
- *           format: date-time
- *           description: Task due date
+ *           format: date
+ *           description: The due date of the task
  *         priority:
  *           type: string
- *           description: Task priority (e.g., Low, Medium, High)
- *         status:
- *           type: string
- *           description: Task status (e.g., Pending, In Progress, Completed)
+ *           description: The priority level of the task
  *         assignedTo:
  *           type: string
- *           description: User ID to whom the task is assigned
- *         createdBy:
- *           type: string
- *           description: User ID who created the task
- */
-
-/**
- * @swagger
- * tags:
- *   - name: Tasks
- *     description: Task management
+ *           description: The user ID to whom the task is assigned
+ *       example:
+ *         title: Finish report
+ *         description: Complete the monthly report
+ *         dueDate: 2024-10-25
+ *         priority: High
+ *         assignedTo: 60d0fe4f5311236168a109ca
  */
 
 /**
  * @swagger
  * /api/tasks:
  *   post:
- *     summary: Create a new task and send notification
+ *     summary: Create a new task
  *     tags: [Tasks]
  *     security:
  *       - bearerAuth: []
@@ -74,13 +66,10 @@ const { sendVerificationEmailService, sendSMS } = require('../services/notificat
  *       201:
  *         description: Task created and notification sent
  *       400:
- *         description: Bad request, invalid input
- *       404:
- *         description: Assigned user not found
+ *         description: Invalid task data
  *       500:
  *         description: Server error
  */
-
 // Route to create a new task and send notification
 router.post('/', [auth, role(['Admin', 'Manager'])], async (req, res) => {
   // Validate task data
@@ -130,6 +119,21 @@ router.post('/', [auth, role(['Admin', 'Manager'])], async (req, res) => {
   }
 });
 
+
+/**
+ * @swagger
+ * /api/tasks:
+ *   get:
+ *     summary: Get all tasks
+ *     tags: [Tasks]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of all tasks
+ *       500:
+ *         description: Server error
+ */
 // Get all tasks
 router.get('/', auth, async (req, res) => {
   try {
@@ -140,6 +144,36 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+
+/**
+ * @swagger
+ * /api/tasks/{id}:
+ *   put:
+ *     summary: Update a task
+ *     tags: [Tasks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The task ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Task'
+ *     responses:
+ *       200:
+ *         description: Task updated
+ *       404:
+ *         description: Task not found
+ *       500:
+ *         description: Server error
+ */
 // Update a task
 router.put('/:id', [auth, role(['Admin', 'Manager'])], async (req, res) => {
   // Validate task update data
@@ -160,6 +194,30 @@ router.put('/:id', [auth, role(['Admin', 'Manager'])], async (req, res) => {
   }
 });
 
+
+/**
+ * @swagger
+ * /api/tasks/{id}:
+ *   delete:
+ *     summary: Delete a task
+ *     tags: [Tasks]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The task ID
+ *     responses:
+ *       200:
+ *         description: Task removed
+ *       404:
+ *         description: Task not found
+ *       500:
+ *         description: Server error
+ */
 // Delete a task
 router.delete('/:id', [auth, role(['Admin'])], async (req, res) => {
   try {

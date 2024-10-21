@@ -1,4 +1,5 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
@@ -18,6 +19,8 @@ dotenv.config();
 // Initialize express app
 const app = express();
 app.use(express.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet());
 app.use(cors());
 
@@ -28,6 +31,35 @@ const limiter = rateLimit({
     message: 'Too many login attempts from this IP, please try again after 15 minutes'
 });
 app.use(limiter);
+
+// Swagger setup
+// const swaggerOptions = {
+//     swaggerDefinition: {
+//         openapi: '3.0.0',
+//         info: {
+//             title: 'Task Manager API',
+//             version: '1.0.0',
+//             description: 'A simple Task Management API',
+//         },
+//         servers: [
+//             {
+//                 url: 'http://localhost:5000',
+//             },
+//             {
+//                 url: 'http://localhost:5000/api/auth',
+//             },
+//             {
+//                 url: 'http://localhost:5000/api/tasks',
+//             },
+//         ],
+//     },
+//     apis: ['./routes/*.js'],
+// };
+
+// const swaggerDocs = swaggerJsDoc(swaggerOptions);
+
+// // Use routes
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Swagger setup
 const swaggerOptions = {
@@ -41,16 +73,26 @@ const swaggerOptions = {
         servers: [
             {
                 url: 'http://localhost:5000',
-            },
+                description: 'Local server'
+            }
         ],
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                },
+            },
+        },
+        security: [{ bearerAuth: [] }],
     },
-    apis: ['./routes/*.js'],
+    apis: ['./routes/*.js'],  // Path to your routes
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-
-// Use routes
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 
@@ -93,13 +135,14 @@ const shutdown = async () => {
     }
 };
 
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
+
 app.get("/test", (req, res) => {
     res.status(200).send("Tested OK");
 });
 
 
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
 
 // Start the server
 const PORT = process.env.PORT || 5000;
