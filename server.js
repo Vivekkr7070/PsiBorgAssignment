@@ -73,8 +73,8 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: 'https://psiborgassignment.onrender.com/',
-                description: 'Hoisted server'
+                url: 'http://localhost:5000',
+                description: 'Local server'
             }
         ],
         components: {
