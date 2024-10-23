@@ -6,7 +6,8 @@ const helmet = require('helmet');
 const cors = require('cors');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
-const connectDB = require('./dbConn');
+const connectDB = require('./dbConn/dbConn');
+const setupIndexes=require('./dbConn/setupIndexes')
 const authRoutes = require('./routes/auth');
 const taskRoutes = require('./routes/tasks');
 const swaggerJsDoc = require('swagger-jsdoc');
@@ -72,8 +73,8 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: 'http://localhost:5000',
-                description: 'Local server'
+                url: 'https://psiborgassignment.onrender.com/',
+                description: 'Hoisted server'
             }
         ],
         components: {
@@ -150,6 +151,7 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
     try {
         await connectDB();
+        await setupIndexes()
         console.log(`Server running on port ${PORT}`);
     } catch (error) {
         console.error('Failed to connect to database:', error.message);

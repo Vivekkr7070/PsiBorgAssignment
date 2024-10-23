@@ -8,8 +8,6 @@ const router = express.Router();
 const { blacklistToken } = require('../middleware/tokenBlacklist')
 
 
-
-
 /**
  * @swagger
  * components:
@@ -69,6 +67,7 @@ const { blacklistToken } = require('../middleware/tokenBlacklist')
  *       500:
  *         description: Server error
  */
+
 // Register user
 router.post('/register', async (req, res) => {
     // Validate the user data
@@ -80,7 +79,13 @@ router.post('/register', async (req, res) => {
     try {
         // Check if the user already exists
         let user = await User.findOne({ email });
-        if (user) return res.status(400).json({ msg: 'User already exists' });
+        if (user) return res.status(400).json({ msg: 'User already exists with this email' });
+
+        // Optionally check if a user already exists with the provided phone number
+        if (phone) {
+            user = await User.findOne({ phone });
+            if (user) return res.status(400).json({ msg: 'User already exists with this phone number' });
+        }
 
         // Create a new user with a specified or default role
         user = new User({ username, email, password, phone, role: role || 'User' });
@@ -91,7 +96,8 @@ router.post('/register', async (req, res) => {
 
         res.status(201).json({ token });
     } catch (err) {
-        res.status(500).send('Server error');
+        console.error(err); // Log the error for debugging
+        res.status(500).json({ message: 'Server error' });
     }
 });
 

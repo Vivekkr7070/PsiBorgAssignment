@@ -43,7 +43,7 @@ const sendSMS = async (to, message) => {
         await client.messages.create({
             body: message,
             from: process.env.TWILIO_PHONE_NUMBER,
-            to: "+917070261370"
+            to: "7070261370"
         });
         console.log('SMS sent successfully');
     } catch (error) {
